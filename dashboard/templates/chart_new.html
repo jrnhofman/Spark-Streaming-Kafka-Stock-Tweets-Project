@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Tweets and Stock Prices</title>
+        <script src='static/Chart.js'></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+
+    </head>
+
+    <body>
+        <center>
+            <h2>Tweets and Stock prices</h2>
+                <div style="width:600px;height:400px">
+                <canvas id="chart"></canvas>
+                </div>
+                <div style="width:600px;height:400px">
+                <canvas id="chart2" ></canvas>
+                </div>
+        </center>
+
+        <script>
+
+           var ctx = document.getElementById("chart");
+           var myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [{% for item in labels %}
+                              "{{item}}",
+                             {% endfor %}],
+                    datasets: dataSetData
+
+                },
+                options: {
+    title: {
+      display: true,
+      text: 'Stock Price'
+    },
+                    scales: {
+                        yAxes: [{
+                            // type: 'logarithmic',
+                            ticks: {
+                                beginAtZero:true,
+                            }
+                        }]
+                    }
+                }
+           });
+
+            var ctx2 = document.getElementById("chart2");
+           var myChart2 = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: [{% for item in labels %}
+                              "{{item}}",
+                             {% endfor %}],
+                    datasets: dataSetData2
+
+                },
+                options: {
+    title: {
+      display: true,
+      text: '#Tweets'
+    },
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero:true
+                            }
+                        }]
+                    }
+                }
+           });
+
+
+           var src_Labels = [];
+           var src_Data = [];
+           var src_Tickers = [];
+            var src_TweetCounts = [];
+
+            var dataSetData = [];
+            var dataSetData2 = [];
+            var colors = [ '#2685CB', '#4AD95A', '#FEC81B', '#FD8D14', '#CE00E6', '#4B4AD3', '#FC3026', '#B8CCE3', '#6ADC88', '#FEE45F'  ];
+
+
+            setInterval(function(){
+                $.getJSON('/refreshData', {
+                }, function(data) {
+                    src_Labels = data.sLabel;
+                    src_Data = data.sData;
+                    src_Tickers = data.sTickers;
+                    src_TweetCounts = data.sTweetCounts;
+                });
+
+                myChart.data.labels = src_Labels;
+                myChart2.data.labels = src_Labels;
+                for (var i = 0; i < src_Data.length; i++) {
+                    console.log(i)
+                    console.log(src_TweetCounts)
+                    dataSetData[i] = {
+                        label: src_Tickers[i],
+                        data: src_Data[i],
+                        backgroundColor: colors[i],
+                        borderColor: colors[i],
+                        borderStyle: 'solid',
+                        borderWidth: 1,
+                        fill: false,
+                    }
+                    dataSetData2[i] = {
+                        label: src_Tickers[i],
+                        data: src_TweetCounts[i],
+                        backgroundColor: colors[i],
+                        borderColor: colors[i],
+                        borderStyle: 'solid',
+                        borderWidth: 1,
+                        fill: false,
+                    }
+                }
+                console.log(dataSetData2);
+                myChart.data.datasets = dataSetData;
+                myChart2.data.datasets = dataSetData2;
+                myChart.update();
+                myChart2.update();
+
+            },10000);
+
+
+
+
+
+        </script>
+
+
+    </body>
+</html>

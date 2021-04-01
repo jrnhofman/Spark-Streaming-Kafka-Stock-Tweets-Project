@@ -1,0 +1,106 @@
+version: "3.5"
+
+networks:
+  app_network:
+    name: app_network
+
+services:
+  # Kafka(-related) setup
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.5.1
+    container_name: zookeeper
+    networks:
+      - app_network
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  broker:
+    image: confluentinc/cp-kafka:5.5.1
+    container_name: broker
+    depends_on:
+      - zookeeper
+    networks:
+      - app_network
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  # Reads tweets from Twitter API
+  tweet-reader:
+    build: tweet-reader/
+    container_name: tweet_reader
+    depends_on:
+      - zookeeper
+      - broker
+    networks:
+      - app_network
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 30
+        # Run the client code
+        python /tweet_producer.py
+
+  # Reads stock ticker prices from yahoo finance API
+  stock-info-reader:
+    build: stock-info-reader/
+    container_name: stock_info_reader
+    depends_on:
+      - zookeeper
+      - broker
+    networks:
+      - app_network
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 30
+        # Run the client code
+        python /get_stock_quotes.py
+
+  # Spark streaming
+  # combines input from tweet-reader
+  # and stock-info-reader
+  spark-streaming-etl:
+    build: spark-streaming-etl/
+    container_name: tweet_consumer
+    depends_on:
+      - zookeeper
+      - broker
+    networks:
+      - app_network
+    ports:
+      - 5001:5001
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 30
+        # Run the client code
+        spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.0.2 ./analyze_tweets.py
+
+  # Receives output from the stream
+  # displaying #tweets and stock prices
+  dashboard:
+    build: dashboard/
+    container_name: dashboard
+    depends_on:
+      - spark-streaming-etl
+    networks:
+      - app_network
+    ports:
+      - 9001:9001
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo 'Giving Kafka a bit of time to start up…'
+        sleep 30
+        # Run the client code
+        python ./app.py
