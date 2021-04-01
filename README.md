@@ -12,7 +12,7 @@ Each of the above components is a separate container, forming a network together
 
 ## Setup
 
-<p align="center"><img src="https://raw.githubusercontent.com/jrnhofman/Spark-Streaming-Kafka-Stock-Tweets-Project/master/images/layout.png" width="200"/></p>
+<p align="center"><img src="https://raw.githubusercontent.com/jrnhofman/Spark-Streaming-Kafka-Stock-Tweets-Project/master/images/layout.png" width="500"/></p>
 
 ## Running the application
 To run the application, simply clone this repository:
@@ -25,8 +25,8 @@ Then start the containers by running
 
 After about 10 minutes you should be able to see data appearing on localhost:9001. Here is a screenshot of what it looks like when the stock market is closed:
 
-<p align="center"><img src="https://raw.githubusercontent.com/jrnhofman/Spark-Streaming-Kafka-Stock-Tweets-Project/master/images/closed_stockmarket.png" width="200"/></p>
+<p align="center"><img src="https://raw.githubusercontent.com/jrnhofman/Spark-Streaming-Kafka-Stock-Tweets-Project/master/images/closed_stockmarket.png" width="500"/></p>
 
 And when it's open:
 
-<p align="center"><img src="https://raw.githubusercontent.com/jrnhofman/Spark-Streaming-Kafka-Stock-Tweets-Project/master/images/open_stockmarket.png" width="200"/></p>
+<p align="center"><img src="https://raw.githubusercontent.com/jrnhofman/Spark-Streaming-Kafka-Stock-Tweets-Project/master/images/open_stockmarket.png" width="500"/></p>
